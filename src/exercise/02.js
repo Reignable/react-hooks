@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 
 function Greeting({ initialName = '' }) {
-  const [name, setName] = useState(window.localStorage.getItem('name') ?? initialName)
+  const [name, setName] = useState(() => window.localStorage.getItem('name') ?? initialName)
 
   useEffect(() => {
     window.localStorage.setItem('name', name)
