@@ -3,12 +3,18 @@
 
 import { useState, useEffect } from 'react'
 
-function Greeting({ initialName = '' }) {
-  const [name, setName] = useState(() => window.localStorage.getItem('name') ?? initialName)
+function useLocalStorageState(storageKey, initialState) {
+  const [value, setValue] = useState(() => JSON.parse(window.localStorage.getItem(storageKey)) ?? initialState)
 
   useEffect(() => {
-    window.localStorage.setItem('name', name)
-  }, [name])
+    window.localStorage.setItem(storageKey, JSON.stringify(value))
+  }, [value, storageKey])
+
+  return [value, setValue]
+}
+
+function Greeting({ initialName = '' }) {
+  const [name, setName] = useLocalStorageState('name', initialName)
 
   function handleChange(event) {
     setName(event.target.value)
@@ -26,7 +32,7 @@ function Greeting({ initialName = '' }) {
 }
 
 function App() {
-  return <Greeting />
+  return <Greeting initialName="Bobby" />
 }
 
 export default App
