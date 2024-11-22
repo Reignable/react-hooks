@@ -1,24 +1,14 @@
 // useState: tic tac toe
 // http://localhost:3000/isolated/exercise/04.js
 
-import { useEffect, useState } from 'react'
+import { useLocalStorageState } from '../utils'
 
 function newGame() {
   return Array(9).fill(null)
 }
 
-function initialiseGame() {
-  const localStorageItem = localStorage.getItem('squares')
-  if (localStorageItem) return JSON.parse(localStorageItem)
-  return newGame()
-}
-
 function Board() {
-  const [squares, setSquares] = useState(initialiseGame)
-
-  useEffect(() => {
-    localStorage.setItem('squares', JSON.stringify(squares))
-  }, [squares])
+  const [squares, setSquares] = useLocalStorageState('squares', newGame())
 
   const nextValue = calculateNextValue(squares)
   const winner = calculateWinner(squares)
