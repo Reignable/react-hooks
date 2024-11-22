@@ -81,6 +81,7 @@ function App() {
       <hr />
       <div className="pokemon-info">
         <PokemonInfoErrorBoundary
+          key={pokemonName}
           fallback={error => (
             <div role="alert">
               There was an error:{' '}
