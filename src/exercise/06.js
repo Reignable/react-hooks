@@ -16,28 +16,32 @@ const STATUS = {
   rejected: 'rejected',
 }
 
-function PokemonInfo({ pokemonName }) {
-  const [pokemon, setPokemon] = useState(null)
-  const [error, setError] = useState(null)
-  const [status, setStatus] = useState(STATUS.idle)
+function usePokemonFetch(pokemonName) {
+  const [state, setState] = useState({
+    status: STATUS.idle,
+  })
 
   useEffect(() => {
     if (!pokemonName) {
-      setStatus(STATUS.idle)
+      setState({ status: STATUS.idle })
       return
     }
-    setStatus(STATUS.pending)
+    setState({ status: STATUS.pending })
     fetchPokemon(pokemonName).then(
       data => {
-        setStatus(STATUS.resolved)
-        setPokemon(data)
+        setState({ status: STATUS.resolved, pokemon: data })
       },
       error => {
-        setStatus(STATUS.rejected)
-        setError(error)
+        setState({ status: STATUS.rejected, error })
       },
     )
   }, [pokemonName])
+
+  return state
+}
+
+function PokemonInfo({ pokemonName }) {
+  const { pokemon, error, status } = usePokemonFetch(pokemonName)
 
   if (status === STATUS.rejected)
     return (
