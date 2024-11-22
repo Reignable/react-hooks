@@ -1,7 +1,7 @@
 // useEffect: HTTP requests
 // http://localhost:3000/isolated/exercise/06.js
 
-import { useEffect, useState } from 'react'
+import { Component, useEffect, useState } from 'react'
 import {
   PokemonForm,
   fetchPokemon,
@@ -43,18 +43,29 @@ function usePokemonFetch(pokemonName) {
 function PokemonInfo({ pokemonName }) {
   const { pokemon, error, status } = usePokemonFetch(pokemonName)
 
-  if (status === STATUS.rejected)
-    return (
-      <div role="alert">
-        There was an error:{' '}
-        <pre style={{ whiteSpace: 'normal' }}>{error.message}</pre>
-      </div>
-    )
+  if (status === STATUS.rejected) throw error
   if (status === STATUS.idle) return 'Submit a pokemon'
   if (status === STATUS.pending)
     return <PokemonInfoFallback name={pokemonName} />
   if (status === STATUS.resolved) return <PokemonDataView pokemon={pokemon} />
   return null
+}
+
+class PokemonInfoErrorBoundary extends Component {
+  state = { error: null }
+
+  static getDerivedStateFromError(error) {
+    return { error }
+  }
+
+  render() {
+    const { error } = this.state
+    if (error) {
+      return this.props.fallback(error)
+    }
+
+    return this.props.children
+  }
 }
 
 function App() {
@@ -69,7 +80,16 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <PokemonInfo pokemonName={pokemonName} />
+        <PokemonInfoErrorBoundary
+          fallback={error => (
+            <div role="alert">
+              There was an error:{' '}
+              <pre style={{ whiteSpace: 'normal' }}>{error.message}</pre>
+            </div>
+          )}
+        >
+          <PokemonInfo pokemonName={pokemonName} />
+        </PokemonInfoErrorBoundary>
       </div>
     </div>
   )
