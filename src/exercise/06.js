@@ -9,27 +9,48 @@ import {
   PokemonDataView,
 } from '../pokemon'
 
+const STATUS = {
+  idle: 'idle',
+  pending: 'pending',
+  resolved: 'resolved',
+  rejected: 'rejected',
+}
+
 function PokemonInfo({ pokemonName }) {
   const [pokemon, setPokemon] = useState(null)
   const [error, setError] = useState(null)
+  const [status, setStatus] = useState(STATUS.idle)
 
   useEffect(() => {
-    if (!pokemonName) return
-    setPokemon(null)
-    setError(null)
-    fetchPokemon(pokemonName).then(setPokemon, setError)
+    if (!pokemonName) {
+      setStatus(STATUS.idle)
+      return
+    }
+    setStatus(STATUS.pending)
+    fetchPokemon(pokemonName).then(
+      data => {
+        setStatus(STATUS.resolved)
+        setPokemon(data)
+      },
+      error => {
+        setStatus(STATUS.rejected)
+        setError(error)
+      },
+    )
   }, [pokemonName])
 
-  if (error)
+  if (status === STATUS.rejected)
     return (
       <div role="alert">
         There was an error:{' '}
         <pre style={{ whiteSpace: 'normal' }}>{error.message}</pre>
       </div>
     )
-  if (!pokemonName) return 'Submit a pokemon'
-  if (!pokemon) return <PokemonInfoFallback name={pokemonName} />
-  return <PokemonDataView pokemon={pokemon} />
+  if (status === STATUS.idle) return 'Submit a pokemon'
+  if (status === STATUS.pending)
+    return <PokemonInfoFallback name={pokemonName} />
+  if (status === STATUS.resolved) return <PokemonDataView pokemon={pokemon} />
+  return null
 }
 
 function App() {
